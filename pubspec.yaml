@@ -34,6 +34,17 @@ dev_dependencies:
 # Flutter configuration
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/walkthrough1.png
+    - assets/images/walkthrough2.png
+    - assets/images/walkthrough3.png
+    - assets/images/logoApp2.png
+    - assets/images/logoApp1.png
+    - assets/images/facebook.png
+    - assets/images/google.png
+    - assets/images/twitter.png
+    - assets/images/apple.png
+
 
   # Assets section (Uncomment and add assets if you need them)
   # assets:
@@ -52,7 +63,5 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  fonts:
-  - family: FredokaOne
-    fonts:
-      - asset: assets/fonts/FredokaOne-Regular.ttf
+
+  
