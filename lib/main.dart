@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart'; // importe ton SplashScreen
+import 'screens/splash_screen.dart';
+//import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/home/plant_category_screen.dart';
+import 'screens/home/all_articles.dart';
+import 'screens/home/ask_ai_screen.dart';
+import 'screens/home/article_detail_screen.dart';
+import 'screens/home/notification_screen.dart';
+import 'package:smartpot/screens/home/dashboard.dart';
+import 'package:smartpot/screens/plant/plants_list_screen.dart';
+import 'package:smartpot/screens/account/my_profile_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const PlantifyApp());
 }
 
 class PlantifyApp extends StatelessWidget {
-  const PlantifyApp({super.key}); // ← simplifié ici
+  const PlantifyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Plantify',
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(), // ici on lance ton SplashScreen
+      home: const SplashScreen(), // écran de démarrage
+      routes: {
+        '/home': (context) => const PlantifyHomePage(),
+        '/plant_category': (context) => const PlantCategoryScreen(),
+        '/all_articles': (context) => const AllArticlesScreen(),
+        '/ask_ai': (context) => const AskAiScreen(),
+        '/article_detail': (context) => const ArticleDetailScreen(),
+        '/notifications': (context) => const NotificationScreen(),
+        '/dashboard': (context) => DashboardScreen(),
+        '/my_plants': (context) => MyPlantsScreen(),
+        '/account': (context) => AccountScreen(),
+      },
     );
   }
 }

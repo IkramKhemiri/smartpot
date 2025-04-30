@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,70 +10,67 @@ class AccountScreen extends StatelessWidget {
     ); // Utiliser une couleur personnalisée
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Account'), backgroundColor: greenColor),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        backgroundColor: greenColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Example Profile Section
-            const CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage(
-                'assets/images/profile.jpg',
-              ), // Replace with user profile image
-            ),
-            const SizedBox(height: 10),
+            // Example of a Dashboard Widget
             const Text(
-              'Username',
+              'Welcome to Your Dashboard',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Email: user@example.com', // Replace with actual email
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: 14,
+                fontSize: 22,
                 color: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
-            // Account Settings Section
+            // Example Card for Plant Stats
             Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ListTile(
-                leading: Icon(Icons.settings, color: greenColor, size: 40),
+                leading: Icon(Icons.grass, color: greenColor, size: 40),
                 title: const Text(
-                  'Account Settings',
+                  'Your Plant Statistics',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text('Manage your account settings'),
+                subtitle: const Text('See how many plants you have and more!'),
                 trailing: Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // Navigate to account settings screen
+                  // Navigate to a detailed statistics screen
                 },
               ),
             ),
             const SizedBox(height: 20),
-            // Log Out Button
+            // Explore Plants Section or other widgets
+            const Text(
+              'Explore More',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: Colors.black,
+              ),
+            ),
+            // Add buttons, cards, or widgets to explore plants, articles, etc.
             ElevatedButton(
               onPressed: () {
-                // Handle logout action
+                // Handle navigation to explore plants
               },
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: greenColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Log Out'),
+              child: const Text('Explore Plants'),
             ),
           ],
         ),

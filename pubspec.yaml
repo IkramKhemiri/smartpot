@@ -14,6 +14,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Google Sign-In
+  google_sign_in: ^6.3.0
 
   # Firebase dependencies
   firebase_core: ^3.13.0 # Version à vérifier selon la dernière disponible
@@ -44,6 +46,20 @@ flutter:
     - assets/images/google.png
     - assets/images/twitter.png
     - assets/images/apple.png
+    - assets/images/ai.png
+    - assets/images/cactus.png
+    - assets/images/flower.png
+    - assets/images/foliage.png
+    - assets/images/fruits.png
+    - assets/images/herbs.png
+    - assets/images/indoor_plants.jpeg
+    - assets/images/mushroom.png
+    - assets/images/poisonous.png
+    - assets/images/shrubs.png
+    - assets/images/succlents.jpeg
+    - assets/images/tree.png
+    - assets/images/vegetables.png
+
 
 
   # Assets section (Uncomment and add assets if you need them)

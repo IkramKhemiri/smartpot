@@ -1,3 +1,4 @@
+
 allprojects {
     repositories {
         google()
@@ -20,13 +21,3 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-pluginManagement {
-    repositories {
-        google()
-        gradlePluginPortal()
-        mavenCentral()
-    }
-    plugins {
-        id("com.google.gms.google-services") version "4.3.15"
-    }
-}

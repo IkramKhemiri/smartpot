@@ -1,6 +1,39 @@
 import 'package:flutter/material.dart';
 import 'sign_up_screen.dart'; // Import the sign up screen
 import 'log_in_screen.dart'; // Import the log in screen
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../home/home_screen.dart';
+
+// 1) Google
+Future<void> _handleGoogleSignIn(BuildContext context) async {
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return;
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final UserCredential userCredential = await FirebaseAuth.instance
+        .signInWithCredential(credential);
+
+    final User? user = userCredential.user;
+    print('Google sign in successful: ${user?.email}');
+
+    // Navigation vers la page d'accueil
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => PlantifyHomePage()),
+    );
+  } catch (e) {
+    print('Error during Google sign in: $e');
+  }
+}
 
 void main() {
   runApp(const WelcomeApp());
@@ -83,7 +116,7 @@ class WelcomeScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'images/logoApp1.png',
+                  'assets/images/logoApp1.png',
                   height: 70,
                   width: 70,
                   fit: BoxFit.contain,
@@ -112,35 +145,12 @@ class WelcomeScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 _buildSocialButton(
                   assetPath:
-                      'images/google.png', // Remplace l'URL par l'image locale
+                      'assets/images/google.png', // Remplace l'URL par l'image locale
                   label: 'Continue with Google',
-                  onPressed: () {},
+                  onPressed: () => _handleGoogleSignIn(context),
                   width: buttonWidth, // Utiliser la largeur définie
                 ),
-                const SizedBox(height: 12),
-                _buildSocialButton(
-                  assetPath:
-                      'images/apple.png', // Remplace l'URL par l'image locale
-                  label: 'Continue with Apple',
-                  onPressed: () {},
-                  width: buttonWidth, // Utiliser la largeur définie
-                ),
-                const SizedBox(height: 12),
-                _buildSocialButton(
-                  assetPath:
-                      'images/facebook.png', // Remplace l'URL par l'image locale
-                  label: 'Continue with Facebook',
-                  onPressed: () {},
-                  width: buttonWidth, // Utiliser la largeur définie
-                ),
-                const SizedBox(height: 12),
-                _buildSocialButton(
-                  assetPath:
-                      'images/twitter.png', // Remplace l'URL par l'image locale
-                  label: 'Continue with Twitter',
-                  onPressed: () {},
-                  width: buttonWidth, // Utiliser la largeur définie
-                ),
+
                 const SizedBox(height: 32),
                 SizedBox(
                   width: buttonWidth, // Utiliser la largeur définie
