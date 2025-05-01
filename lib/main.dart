@@ -4,6 +4,7 @@ import 'screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/home/models/article.dart';
 import 'screens/home/plant_category_screen.dart';
 import 'screens/home/all_articles.dart';
 import 'screens/home/ask_ai_screen.dart';
@@ -33,11 +34,23 @@ class PlantifyApp extends StatelessWidget {
         '/plant_category': (context) => const PlantCategoryScreen(),
         '/all_articles': (context) => const AllArticlesScreen(),
         '/ask_ai': (context) => const AskAiScreen(),
-        '/article_detail': (context) => const ArticleDetailScreen(),
+        '/article_detail':
+            (context) => ArticleDetailScreen(
+              article: ModalRoute.of(context)!.settings.arguments as Article,
+            ),
         '/notifications': (context) => const NotificationScreen(),
         '/dashboard': (context) => DashboardScreen(),
         '/my_plants': (context) => MyPlantsScreen(),
         '/account': (context) => AccountScreen(),
+      },
+      // Gestion des routes non trouvées
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder:
+              (context) => Scaffold(
+                body: Center(child: Text('Page non trouvée: ${settings.name}')),
+              ),
+        );
       },
     );
   }

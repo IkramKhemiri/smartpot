@@ -8,6 +8,15 @@ import 'dashboard.dart';
 import 'package:smartpot/screens/plant/plants_list_screen.dart';
 import 'package:smartpot/screens/account/my_profile_screen.dart';
 import 'search_screen.dart';
+import 'package:smartpot/widgets/custom_bottom_navbar.dart';
+import 'models/article.dart';
+
+class Category {
+  final String title;
+  final String image;
+
+  Category({required this.title, required this.image});
+}
 
 void main() {
   runApp(const PlantifyApp());
@@ -28,7 +37,6 @@ class PlantifyApp extends StatelessWidget {
         '/ask_ai': (context) => const AskAiScreen(),
         '/notifications': (context) => const NotificationScreen(),
         '/all_articles': (context) => const AllArticlesScreen(),
-        '/article_detail': (context) => const ArticleDetailScreen(),
         '/home':
             (context) => const PlantifyHomePage(), // Route pour l'écran Home
         '/dashboard':
@@ -58,30 +66,52 @@ class _PlantifyHomePageState extends State<PlantifyHomePage> {
   int currentIndex = 0;
 
   // Liste des articles populaires
-  final List<Map<String, String>> popularArticles = [
-    {
-      'image': 'assets/images/succlents.jpeg',
-      'title': 'Unlock the Secrets of Succulents: Care Tips for...',
-      'id': '1',
-    },
-    {
-      'image': 'assets/images/indoor_plants.jpeg',
-      'title': 'The Ultimate Guide to Indoor Plants: From...',
-      'id': '2',
-    },
-  ];
+  List<Article> popularArticles = [];
 
-  Widget buildPopularArticle(
-    String imageAsset,
-    String title,
-    String articleId,
-  ) {
+  @override
+  void initState() {
+    super.initState();
+    loadArticles(); // appel de fonction pour charger les données
+  }
+
+  void loadArticles() {
+    popularArticles = [
+      Article(
+        id: '1',
+        title: 'Unlock the Secrets of Succulents: Care Tips for...',
+        image: 'assets/images/succlents.jpeg',
+        author: 'Jane Doe',
+        date: '2024-05-01',
+        content:
+            'Succulents are low-maintenance plants that thrive in dry conditions...',
+        tips: ['Use well-draining soil', 'Water only when soil is dry'],
+        troubleshooting: ['Leaves falling off', 'Root rot'],
+      ),
+      Article(
+        id: '2',
+        title: 'The Ultimate Guide to Indoor Plants: From...',
+        image: 'assets/images/indoor_plants.jpeg',
+        author: 'John Smith',
+        date: '2024-04-20',
+        content: 'Indoor plants purify the air and add a touch of nature...',
+        tips: ['Place near sunlight', 'Avoid overwatering'],
+        troubleshooting: ['Yellowing leaves', 'Pest infestation'],
+      ),
+    ];
+    setState(() {}); // Met à jour l'affichage
+  }
+
+  Widget buildPopularArticle(Article article) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
+        Navigator.push(
           context,
-          '/article_detail',
-          arguments: articleId, // Passer l'ID de l'article
+          MaterialPageRoute(
+            builder:
+                (context) => ArticleDetailScreen(
+                  article: article,
+                ), // Passe l'objet article ici
+          ),
         );
       },
       child: SizedBox(
@@ -94,17 +124,17 @@ class _PlantifyHomePageState extends State<PlantifyHomePage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
-                imageAsset,
+                article.image,
                 height: 80,
                 width: 160,
                 fit: BoxFit.cover,
-                semanticLabel: title,
+                semanticLabel: article.title,
               ),
             ),
             const SizedBox(height: 4),
             Expanded(
               child: Text(
-                title,
+                article.title,
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black,
@@ -171,42 +201,10 @@ class _PlantifyHomePageState extends State<PlantifyHomePage> {
     final greenColor = const Color(0xFF16A34A);
     return Scaffold(
       backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: CustomBottomNavBar(
         currentIndex: currentIndex,
-        selectedItemColor: greenColor,
-        unselectedItemColor: Colors.grey.shade600,
-        selectedFontSize: 10,
-        unselectedFontSize: 10,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-          // Naviguer vers la page en fonction de l'index
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/dashboard');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/my_plants');
-              break;
-            case 3:
-              Navigator.pushReplacementNamed(context, '/account');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.grass), label: 'My Plants'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Account'),
-        ],
+        selectedColor: greenColor,
+        unselectedColor: Colors.grey.shade600,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -328,16 +326,15 @@ class _PlantifyHomePageState extends State<PlantifyHomePage> {
                 height: 120,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: [
-                    ...popularArticles.map(
-                      (article) => buildPopularArticle(
-                        article['image']!,
-                        article['title']!,
-                        article['id']!,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
+                  children:
+                      popularArticles
+                          .map(
+                            (article) => Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: buildPopularArticle(article),
+                            ),
+                          )
+                          .toList(),
                 ),
               ),
 

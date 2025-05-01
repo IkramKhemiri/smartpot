@@ -37,6 +37,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/*
     - assets/images/walkthrough1.png
     - assets/images/walkthrough2.png
     - assets/images/walkthrough3.png
@@ -57,6 +58,7 @@ flutter:
     - assets/images/poisonous.png
     - assets/images/shrubs.png
     - assets/images/succlents.jpeg
+    - assets/images/winter_plants.jpeg
     - assets/images/tree.png
     - assets/images/vegetables.png
 
