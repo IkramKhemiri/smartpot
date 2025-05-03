@@ -22,6 +22,16 @@ dependencies:
   firebase_analytics: ^11.4.5 # Version à vérifier selon la dernière disponible
   cloud_firestore: ^5.6.6
   firebase_auth: ^5.5.2
+  firebase_database: 11.3.5
+  fl_chart: 0.71.0
+
+  dialogflow_grpc: ^0.2.9
+  grpc: ^3.0.0
+  protobuf: ^2.0.0
+  googleapis: ^12.0.0
+  googleapis_auth: ^1.6.0  
+  uuid: ^3.0.7
+
 
   # Cupertino Icons for iOS-style icons
   cupertino_icons: ^1.0.8
@@ -37,7 +47,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/*
     - assets/images/walkthrough1.png
     - assets/images/walkthrough2.png
     - assets/images/walkthrough3.png
@@ -61,7 +70,117 @@ flutter:
     - assets/images/winter_plants.jpeg
     - assets/images/tree.png
     - assets/images/vegetables.png
-
+    - assets/images/autumn_crocus.jpeg
+    - assets/images/yew.jpeg
+    - assets/images/angels_trumpet.jpeg
+    - assets/images/hemlock.jpeg
+    - assets/images/nightshade.jpeg
+    - assets/images/dumb_cane.jpeg
+    - assets/images/lily_of_the_valley.jpeg
+    - assets/images/castor_bean.jpeg
+    - assets/images/foxglove.jpeg
+    - assets/images/oleander.jpeg
+    - assets/images/lions_mane.jpeg
+    - assets/images/turkey_tail.jpeg
+    - assets/images/king_oyster.jpeg
+    - assets/images/morel.jpeg
+    - assets/images/chanterelle.jpeg
+    - assets/images/enoki.jpeg
+    - assets/images/portobello.jpeg
+    - assets/images/oyster_mushroom.jpeg
+    - assets/images/shiitake.jpeg
+    - assets/images/button_mushroom.jpeg
+    - assets/images/sage.jpeg
+    - assets/images/dill.jpeg
+    - assets/images/chives.jpeg
+    - assets/images/oregano.jpeg
+    - assets/images/cilantro.jpeg
+    - assets/images/rosemary.jpeg
+    - assets/images/thyme.jpeg
+    - assets/images/mint.jpeg
+    - assets/images/parsley.jpeg
+    - assets/images/basil.jpeg
+    - assets/images/pepper.jpeg
+    - assets/images/garlic.jpeg
+    - assets/images/onion.jpeg
+    - assets/images/cabbage.jpeg
+    - assets/images/spinach.jpeg
+    - assets/images/broccoli.jpeg
+    - assets/images/lettuce.jpeg
+    - assets/images/potato.jpeg
+    - assets/images/carrot.jpeg
+    - assets/images/tomato.jpeg
+    - assets/images/papaya.jpeg
+    - assets/images/lemon.jpeg
+    - assets/images/peach.jpeg
+    - assets/images/grapes.jpeg
+    - assets/images/pineapple.jpeg
+    - assets/images/mango.jpeg
+    - assets/images/strawberry.jpeg
+    - assets/images/orange.jpeg
+    - assets/images/banana.jpeg
+    - assets/images/apple.jpeg
+    - assets/images/rose_of_sharon.jpeg
+    - assets/images/hibiscus_shrub.jpeg
+    - assets/images/weigela.jpeg
+    - assets/images/butterfly_bush.jpeg
+    - assets/images/spirea.jpeg
+    - assets/images/lilac.jpeg
+    - assets/images/forsythia.jpeg
+    - assets/images/azalea.jpeg
+    - assets/images/hydrangea.jpeg
+    - assets/images/boxwood.jpeg
+    - assets/images/purslane.jpeg
+    - assets/images/nutsedge.jpeg
+    - assets/images/creeping_charlie.jpeg
+    - assets/images/chickweed.jpeg
+    - assets/images/lambs_quarters.jpeg
+    - assets/images/ground_ivy.jpeg
+    - assets/images/pigweed.jpeg
+    - assets/images/bindweed.jpeg
+    - assets/images/crabgrass.jpeg
+    - assets/images/dandelion.jpeg
+    - assets/images/magnolia.jpeg
+    - assets/images/birch.jpeg
+    - assets/images/eucalyptus.jpeg
+    - assets/images/olive_tree.jpeg
+    - assets/images/cedar.jpeg
+    - assets/images/apple_tree.jpeg
+    - assets/images/cherry_tree.jpeg
+    - assets/images/pine_tree.jpeg
+    - assets/images/maple_tree.jpeg
+    - assets/images/oak_tree.jpeg
+    - assets/images/christmas_cactus.jpeg
+    - assets/images/agave.jpeg
+    - assets/images/lithops.jpeg
+    - assets/images/crown_of_thorns.jpeg
+    - assets/images/panda_plant.jpeg
+    - assets/images/echeveria.jpeg
+    - assets/images/burros_tail.jpeg
+    - assets/images/jade_plant.jpeg
+    - assets/images/zebra_haworthia.jpeg
+    - assets/images/aloe_vera.jpeg
+    - assets/images/rose.jpeg
+    - assets/images/marigold.jpeg
+    - assets/images/petunia.jpeg
+    - assets/images/hibiscus.jpeg
+    - assets/images/geranium.jpeg
+    - assets/images/begonia.jpeg
+    - assets/images/anthurium.jpeg
+    - assets/images/orchid.jpeg
+    - assets/images/peace_lily.jpeg
+    - assets/images/african_violet.jpeg
+    - assets/images/croton.jpeg
+    - assets/images/cast_iron_plant.jpeg
+    - assets/images/chinese_evergreen.jpeg
+    - assets/images/swiss_cheese_plant.jpeg
+    - assets/images/philodendron.jpeg
+    - assets/images/pothos.jpeg
+    - assets/images/zz_plant.jpeg
+    - assets/images/snake_plant.jpeg
+    - assets/images/baby_rubber_plant.jpeg
+    - assets/images/prayer_plant.jpeg
+    - assets/smartpot-chatbot-b8c9c78aec39.json
 
 
   # Assets section (Uncomment and add assets if you need them)

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smartpot-chatbot",
+  "private_key_id": "b8c9c78aec392d182d07cbecc7710aed906afd7b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCyEbliTWXYiw94\nScIUiWGFM8zo0VEYG9K0itM4es2VHtTGKWhsQwJ1whsv2Fr6iuHRWm9fTQ5sRXAT\nF68uCWxmhBSmj7UcnEvfiuxfxJ0GDbjvAGKwaI4yWuaL+D5QqHQgtVuBK+L9do8h\ngMsgklshr39P+VEvvAQjbp5k3983yrlMXLe65bgzw2e5doyQLroEwQQYuFWwbBD3\n8R7VavWNAWzNwjsn6dthLXMPgWAlkU6ofUQfSHl7fGoOIRXNklK3hZ+IpoJyvWxh\nIcBkwTC+ZHgqekKXXmCJlvuEXd5NdZfbBAK1qt0gamXlM3GsycplSfQhCCd5K8rF\n3KRvkpJdAgMBAAECggEAARtyGyXfDb8jm/xdbBJEnHbrfcEbb3pwz3WThaTh1V0J\nNqg4QYATKldIIv6F5kvpxor46U9J2St/XGcHzFH7rhGBLV30Ytan9B5hhODslwaL\n0VSfyHgF9lMxXspu3MKHYlKuXHnA4hGUJ0GtQakXTvjP4lfrBNB2+B9udbMcqLSj\n0xtoc0j+XT8Uhp6+HM5XZZRwqdyGMv0JrEef6+U/N6j51C0oUFW74PJHlyCzYEdd\nXg8cLv+rxk8Nmn5NdzrHcI3PzfjQiE6oyhcmFBSxwfU1YECoJT5vbepP3pKaATcD\nIEZ4Uvk/SnuKL9iVksCqvNUvhj4oIQkaq5YzmsET0wKBgQDokg4gJ3DFibB0D6zY\n4e/ly1C+lW10pIX+q3u8JYllkivTtFv6fKbdWRF8CcfV/aUBVENEV6/eL3W5OsLO\n28V/qsxQkUDI4nL0DStot1R4HBtKfPQCvMwxZNWP1xEMHqtNByVl23KmWMu+Jk1e\nTUWYfPbGKbPcfhOrG8v4PCwT1wKBgQDEAheWMr7779dp9QF3p62VIz07lgVsMIAy\nxEMAW5f9WUKZ8iTsff/z3etBNeo5cUYLulOakVirpLalzXWMB1HmoSPhek56WdRN\nxCN34vdYa6bjQhP6LwQY74Tuu8RyzvnSqCXadBbAh6XF+Na8JyPE6VDBpJq78JUC\npW8ZifsE6wKBgF60MvpW9S4LXoY0Z989SdIaU7v330VzRXkp3U4FPwjUV/JybE34\n+n4CKgOHfA+gpNOAu4+V4XCphNeznOZdSfQt2dso+ueShtrojferR8NNNrPDZB3F\nQaUPeYOEQVXdG0ZXlZv/m5UvbW/16uVus9tfb6HME4jC8kFoJUvlPNGrAoGADyX+\nPqxzWDNEGbtGvsGlx7XugJFqn97ruYCzkO6DQ6BHZnBxbBmc03MeQG7zSDc566Qd\n2/9JtBJJz2yenhDewo1HoaB7OjeBEfWLrDNNXHcNcdjkhFxn26l/Q5gdaaYXZrF6\nI3T/YSfapv9BUU9RE2HYzO50yvuf+JFikb25ObsCgYEAnNIgb60hthBDWW2lezAL\nTGCIQ0OsRgBL890Iq1Ybp2/8uO4zcP1gx7xf16dtd0UPyhtsJXNHJODgpbGB9MX3\n6X7lTyQsHA3yo+YRwt3AWfJKSCAhiZLtYqTz+btJ3vVIunDAPRn2+E+BmxSjuigg\nveCTTf05RgzPyqlw97v3nYw=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dialogflow-access@smartpot-chatbot.iam.gserviceaccount.com",
+  "client_id": "113179030146365920633",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dialogflow-access%40smartpot-chatbot.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
