@@ -1,108 +1,168 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AskAiScreen extends StatefulWidget {
-  const AskAiScreen({super.key});
+  const AskAiScreen({Key? key}) : super(key: key);
 
   @override
-  State<AskAiScreen> createState() => _AskAiScreenState();
+  _AskAiScreenState createState() => _AskAiScreenState();
 }
 
 class _AskAiScreenState extends State<AskAiScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [];
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, String>> _messages = [];
+  bool _isListening = false;
+  late stt.SpeechToText _speech;
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  Future<void> _sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
 
     setState(() {
-      _messages.add({
-        'text': _messageController.text,
-        'isUser': true,
-        'time': DateTime.now(),
-      });
+      _messages.add({'sender': 'user', 'text': text.trim()});
+      _controller.clear();
     });
 
-    // Simuler une réponse de l'IA
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        _messages.add({
-          'text': 'Voici une réponse à votre question sur les plantes...',
-          'isUser': false,
-          'time': DateTime.now(),
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'http://10.0.2.2:5000/chat',
+        ), // adjust IP if not using emulator
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'text': text}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final aiResponse = data['response'];
+
+        setState(() {
+          _messages.add({'sender': 'assistant', 'text': aiResponse});
         });
+      } else {
+        setState(() {
+          _messages.add({
+            'sender': 'assistant',
+            'text':
+                "Error: Server responded with status ${response.statusCode}.",
+          });
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _messages.add({'sender': 'assistant', 'text': "Error: $e"});
       });
-    });
+    }
+  }
 
-    _messageController.clear();
+  Widget _buildMessage(Map<String, String> message) {
+    final isUser = message['sender'] == 'user';
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: isUser ? Colors.green[200] : Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          message['text'] ?? '',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (result) async {
+            if (result.finalResult) {
+              final recognizedText = result.recognizedWords;
+              setState(() {
+                _controller.text = recognizedText;
+              });
+              _stopListening();
+              await _sendMessage(recognizedText);
+            }
+          },
+        );
+      }
+    } else {
+      _stopListening();
+    }
+  }
+
+  void _stopListening() {
+    _speech.stop();
+    setState(() => _isListening = false);
+  }
+
+  @override
+  void dispose() {
+    _speech.stop();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plantify AI'),
-        backgroundColor: const Color(0xFF16A34A),
+        title: const Text("Smart Pot Assistant"),
+        backgroundColor: Colors.green,
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return Align(
-                  alignment:
-                      message['isUser']
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          message['isUser']
-                              ? const Color(0xFF16A34A)
-                              : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      message['text'],
-                      style: TextStyle(
-                        color: message['isUser'] ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ),
-                );
-              },
+            child: ListView(
+              padding: const EdgeInsets.all(8),
+              children: _messages.map(_buildMessage).toList(),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8.0,
+              vertical: 12.0,
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Posez votre question...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: "Ask something about your plant...",
+                      border: OutlineInputBorder(),
                     ),
-                    onSubmitted: (_) => _sendMessage(),
+                    onSubmitted: _sendMessage,
                   ),
                 ),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send),
-                  color: const Color(0xFF16A34A),
-                  onPressed: _sendMessage,
+                  onPressed: _listen,
+                  icon: Icon(
+                    _isListening ? Icons.mic_off : Icons.mic,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _sendMessage(_controller.text),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Icon(Icons.send),
                 ),
               ],
             ),

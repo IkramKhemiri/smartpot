@@ -29,6 +29,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders += [
+            applicationIcon: '@mipmap/ic_launcher',
+            applicationIconRound: '@mipmap/ic_launcher_round'
+        ]
     }
 
     buildTypes {

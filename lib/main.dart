@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart';
-//import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
+import 'screens/splash_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/models/article.dart';
 import 'screens/home/plant_category_screen.dart';
@@ -14,10 +14,35 @@ import 'package:smartpot/screens/home/dashboard.dart';
 import 'package:smartpot/screens/plant/plants_list_screen.dart';
 import 'package:smartpot/screens/account/my_profile_screen.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialisation de Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Configuration des notifications locales
+  await _initializeNotifications();
+
   runApp(const PlantifyApp());
+}
+
+Future<void> _initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      // Gérer le clic sur les notifications ici si nécessaire
+    },
+  );
 }
 
 class PlantifyApp extends StatelessWidget {
@@ -28,7 +53,14 @@ class PlantifyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Plantify',
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(), // écran de démarrage
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF16A34A),
+          elevation: 0,
+        ),
+      ),
+      home: const SplashScreen(),
       routes: {
         '/home': (context) => const PlantifyHomePage(),
         '/plant_category': (context) => const PlantCategoryScreen(),
@@ -43,11 +75,11 @@ class PlantifyApp extends StatelessWidget {
         '/my_plants': (context) => MyPlantsScreen(),
         '/account': (context) => AccountScreen(),
       },
-      // Gestion des routes non trouvées
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
           builder:
               (context) => Scaffold(
+                appBar: AppBar(title: const Text('Erreur')),
                 body: Center(child: Text('Page non trouvée: ${settings.name}')),
               ),
         );
