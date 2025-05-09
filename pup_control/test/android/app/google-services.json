@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "547282534823",
+    "firebase_url": "https://smart-pot-b0d41-default-rtdb.firebaseio.com",
+    "project_id": "smart-pot-b0d41",
+    "storage_bucket": "smart-pot-b0d41.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547282534823:android:d772d2dfbb19f8b52bb682",
+        "android_client_info": {
+          "package_name": "com.example.smart_pot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3wrWI54AS6JrVzc47z78_E6UPUZ_Mg7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547282534823:android:bef6d0b7db1b667b2bb682",
+        "android_client_info": {
+          "package_name": "com.example.testapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3wrWI54AS6JrVzc47z78_E6UPUZ_Mg7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -11,549 +11,348 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref(
-    'sensors_data',
+  final DatabaseReference _database = FirebaseDatabase.instance.ref(
+    'sensor_alerts',
   );
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  // Configuration des seuils
-  double minHumidity = 30.0;
-  double maxHumidity = 70.0;
-  double minTemperature = 15.0;
-  double maxTemperature = 30.0;
-  double minSoilMoisture = 20.0;
-  double maxSoilMoisture = 80.0;
-  double minLuminosity = 100.0;
-  double maxLuminosity = 1000.0;
-
-  List<Map<String, dynamic>> notifications = [];
-  bool loading = true;
-  bool _isListening = false;
+  final List<Map<String, dynamic>> _alerts = [];
+  bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
-    _loadInitialData();
+    _setupDatabaseListener();
+    _checkPendingNotifications();
   }
 
-  @override
-  void dispose() {
-    _dbRef.onValue.drain();
-    super.dispose();
-  }
-
-  Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> _loadInitialData() async {
-    try {
-      final snapshot = await _dbRef.orderByKey().limitToLast(10).once();
-      if (snapshot.snapshot.exists) {
-        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-        _processData(data);
-      }
-      _startRealtimeListener();
-    } catch (error) {
-      _handleError(error);
-    } finally {
-      setState(() => loading = false);
+  Future<void> _checkPendingNotifications() async {
+    final details =
+        await FlutterLocalNotificationsPlugin()
+            .getNotificationAppLaunchDetails();
+    if (details?.didNotificationLaunchApp ?? false) {
+      _handleNotificationNavigation(details!.notificationResponse);
     }
   }
 
-  void _startRealtimeListener() {
-    if (_isListening) return;
-
-    _dbRef.limitToLast(1).onValue.listen((event) {
-      if (event.snapshot.exists) {
-        final data = event.snapshot.value as Map<dynamic, dynamic>;
-        _processData(data);
-      }
-    }, onError: _handleError);
-
-    _isListening = true;
-  }
-
-  void _processData(Map<dynamic, dynamic> data) {
-    final latestEntry = data.values.last as Map<dynamic, dynamic>;
-
-    final humidity = latestEntry['humidity']?.toDouble();
-    final temperature = latestEntry['temperature']?.toDouble();
-    final soilMoisture = latestEntry['soilMoisture']?.toDouble();
-    final luminosity = latestEntry['luminosity']?.toDouble();
-
-    if (humidity != null &&
-        temperature != null &&
-        soilMoisture != null &&
-        luminosity != null) {
-      _checkThresholdsAndNotify(
-        humidity,
-        temperature,
-        soilMoisture,
-        luminosity,
-      );
+  void _handleNotificationNavigation(NotificationResponse? response) {
+    if (response?.payload != null) {
+      Navigator.pushNamed(context, response!.payload!);
     }
   }
 
-  void _checkThresholdsAndNotify(
-    double humidity,
-    double temperature,
-    double soilMoisture,
-    double luminosity,
-  ) {
-    final now = DateTime.now();
-    final timeString = DateFormat('HH:mm').format(now);
-
-    // Vérification humidité
-    if (humidity < minHumidity) {
-      _addNotification(
-        'Humidité trop basse',
-        '${humidity.toStringAsFixed(1)}% (min: $minHumidity%)',
-        false,
-        now,
-      );
-    } else if (humidity > maxHumidity) {
-      _addNotification(
-        'Humidité trop élevée',
-        '${humidity.toStringAsFixed(1)}% (max: $maxHumidity%)',
-        false,
-        now,
-      );
-    }
-
-    // Vérification température
-    if (temperature < minTemperature) {
-      _addNotification(
-        'Température trop basse',
-        '${temperature.toStringAsFixed(1)}°C (min: $minTemperature°C)',
-        false,
-        now,
-      );
-    } else if (temperature > maxTemperature) {
-      _addNotification(
-        'Température trop élevée',
-        '${temperature.toStringAsFixed(1)}°C (max: $maxTemperature°C)',
-        false,
-        now,
-      );
-    }
-
-    // Vérification humidité du sol
-    if (soilMoisture < minSoilMoisture) {
-      _addNotification(
-        'Sol trop sec',
-        '${soilMoisture.toStringAsFixed(1)}% (min: $minSoilMoisture%)',
-        false,
-        now,
-      );
-    } else if (soilMoisture > maxSoilMoisture) {
-      _addNotification(
-        'Sol trop humide',
-        '${soilMoisture.toStringAsFixed(1)}% (max: $maxSoilMoisture%)',
-        false,
-        now,
-      );
-    }
-
-    // Vérification luminosité
-    if (luminosity < minLuminosity) {
-      _addNotification(
-        'Luminosité faible',
-        '${luminosity.toStringAsFixed(1)} lux (min: $minLuminosity lux)',
-        false,
-        now,
-      );
-    } else if (luminosity > maxLuminosity) {
-      _addNotification(
-        'Luminosité forte',
-        '${luminosity.toStringAsFixed(1)} lux (max: $maxLuminosity lux)',
-        false,
-        now,
-      );
-    }
+  void _setupDatabaseListener() {
+    _database
+        .orderByChild('timestamp')
+        .limitToLast(50)
+        .onValue
+        .listen(
+          (event) {
+            _processAlerts(event.snapshot);
+          },
+          onError: (error) {
+            setState(() {
+              _hasError = true;
+              _isLoading = false;
+            });
+          },
+        );
   }
 
-  void _addNotification(
-    String title,
-    String message,
-    bool read,
-    DateTime timestamp,
-  ) {
-    setState(() {
-      notifications.insert(0, {
-        'title': title,
-        'message': message,
-        'time': _formatTimestamp(timestamp),
-        'timestamp': timestamp,
-        'read': read,
-        'type': _getNotificationType(title),
+  void _processAlerts(DataSnapshot snapshot) {
+    final List<Map<String, dynamic>> newAlerts = [];
+
+    if (snapshot.value != null) {
+      final Map<dynamic, dynamic> data =
+          snapshot.value as Map<dynamic, dynamic>;
+      data.forEach((key, value) {
+        final alert = value as Map<dynamic, dynamic>;
+        newAlerts.add({
+          'id': key,
+          'title': alert['title'] ?? 'Alerte',
+          'message': alert['message'] ?? 'Nouvelle alerte détectée',
+          'timestamp':
+              alert['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+          'type': alert['type'] ?? 'general',
+          'isRead': alert['isRead'] ?? false,
+        });
       });
-    });
+    }
 
-    _showLocalNotification(title, message);
+    setState(() {
+      _alerts.clear();
+      _alerts.addAll(newAlerts.reversed.toList());
+      _isLoading = false;
+    });
   }
 
-  String _formatTimestamp(DateTime timestamp) {
+  Future<void> _markAsRead(String alertId) async {
+    await _database.child(alertId).update({'isRead': true});
+  }
+
+  Future<void> _deleteAlert(String alertId) async {
+    await _database.child(alertId).remove();
+  }
+
+  String _formatTimestamp(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (timestamp.isAfter(today)) {
-      return 'Aujourd\'hui à ${DateFormat('HH:mm').format(timestamp)}';
-    } else if (timestamp.isAfter(yesterday)) {
-      return 'Hier à ${DateFormat('HH:mm').format(timestamp)}';
+    if (date.isAfter(today)) {
+      return 'Aujourd\'hui à ${DateFormat('HH:mm').format(date)}';
+    } else if (date.isAfter(yesterday)) {
+      return 'Hier à ${DateFormat('HH:mm').format(date)}';
     } else {
-      return DateFormat('dd/MM/yyyy à HH:mm').format(timestamp);
+      return DateFormat('dd/MM/yyyy à HH:mm').format(date);
     }
   }
 
-  String _getNotificationType(String title) {
-    if (title.contains('Humidité')) return 'humidity';
-    if (title.contains('Température')) return 'temperature';
-    if (title.contains('Sol')) return 'soil';
-    if (title.contains('Luminosité')) return 'light';
-    return 'general';
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'temperature':
+        return Icons.thermostat;
+      case 'humidity':
+        return Icons.water_drop;
+      case 'soil':
+        return Icons.grass;
+      case 'light':
+        return Icons.light_mode;
+      default:
+        return Icons.notifications;
+    }
   }
 
-  Future<void> _showLocalNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'sensor_alerts',
-          'Alertes Capteurs',
-          importance: Importance.high,
-          priority: Priority.high,
-          colorized: true,
-          color: Color(0xFF16A34A),
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      platformChannelSpecifics,
-    );
-  }
-
-  void _markAsRead(int index) {
-    setState(() {
-      notifications[index]['read'] = true;
-    });
-  }
-
-  void _deleteNotification(int index) {
-    setState(() {
-      notifications.removeAt(index);
-    });
-  }
-
-  void _handleError(dynamic error) {
-    debugPrint('Firebase error: $error');
-    _addNotification(
-      'Erreur de connexion',
-      'Impossible de récupérer les données des capteurs',
-      true,
-      DateTime.now(),
-    );
+  Color _getColorForType(String type) {
+    switch (type) {
+      case 'temperature':
+        return Colors.orange;
+      case 'humidity':
+        return Colors.blue;
+      case 'soil':
+        return Colors.brown;
+      case 'light':
+        return Colors.amber;
+      default:
+        return Colors.green;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alertes Capteurs'),
-        backgroundColor: const Color(0xFF16A34A),
+        title: const Text('Historique des Alertes'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_alt),
-            onPressed: () => _showFilterDialog(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showSettingsDialog(),
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: _confirmClearAll,
           ),
         ],
       ),
-      body:
-          loading
-              ? const Center(child: CircularProgressIndicator())
-              : notifications.isEmpty
-              ? const Center(
-                child: Text(
-                  'Aucune alerte pour le moment',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-              )
-              : RefreshIndicator(
-                onRefresh: _loadInitialData,
-                child: ListView.builder(
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final notification = notifications[index];
-                    return Dismissible(
-                      key: Key('${notification['timestamp']}-$index'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      onDismissed: (direction) => _deleteNotification(index),
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        elevation: notification['read'] ? 1 : 2,
-                        color:
-                            notification['read']
-                                ? Colors.white
-                                : Colors.green[50],
-                        child: ListTile(
-                          leading: _buildNotificationIcon(notification['type']),
-                          title: Text(
-                            notification['title'],
-                            style: TextStyle(
-                              fontWeight:
-                                  notification['read']
-                                      ? FontWeight.normal
-                                      : FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(notification['message']),
-                              const SizedBox(height: 4),
-                              Text(
-                                notification['time'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing:
-                              !notification['read']
-                                  ? const Icon(
-                                    Icons.circle,
-                                    size: 10,
-                                    color: Colors.green,
-                                  )
-                                  : null,
-                          onTap: () => _markAsRead(index),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+      body: _buildBody(),
     );
   }
 
-  Widget _buildNotificationIcon(String type) {
-    IconData icon;
-    Color color;
-
-    switch (type) {
-      case 'humidity':
-        icon = Icons.water_drop;
-        color = Colors.blue;
-        break;
-      case 'temperature':
-        icon = Icons.thermostat;
-        color = Colors.orange;
-        break;
-      case 'soil':
-        icon = Icons.grass;
-        color = Colors.brown;
-        break;
-      case 'light':
-        icon = Icons.light_mode;
-        color = Colors.yellow[700]!;
-        break;
-      default:
-        icon = Icons.notifications;
-        color = Colors.green;
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
     }
 
-    return CircleAvatar(
-      backgroundColor: color.withOpacity(0.2),
-      child: Icon(icon, color: color),
-    );
-  }
-
-  Future<void> _showFilterDialog() async {
-    final types = {
-      'Tous': 'all',
-      'Humidité': 'humidity',
-      'Température': 'temperature',
-      'Sol': 'soil',
-      'Luminosité': 'light',
-    };
-    String? selectedType = 'all';
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Filtrer les alertes'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  types.entries.map((entry) {
-                    return RadioListTile<String>(
-                      title: Text(entry.key),
-                      value: entry.value,
-                      groupValue: selectedType,
-                      onChanged: (value) {
-                        Navigator.pop(context);
-                        selectedType = value;
-                        // Implémentez le filtrage ici
-                      },
-                    );
-                  }).toList(),
+    if (_hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 50, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('Erreur de connexion', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _retryConnection,
+              child: const Text('Réessayer'),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      );
+    }
+
+    if (_alerts.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_off, size: 50, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'Aucune alerte récente',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshAlerts,
+      child: ListView.builder(
+        itemCount: _alerts.length,
+        itemBuilder: (context, index) {
+          final alert = _alerts[index];
+          return _buildAlertCard(alert);
+        },
+      ),
     );
   }
 
-  Future<void> _showSettingsDialog() async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Paramètres des seuils'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+  Widget _buildAlertCard(Map<String, dynamic> alert) {
+    final alertColor = _getColorForType(alert['type']);
+
+    return Dismissible(
+      key: Key(alert['id']),
+      background: Container(color: Colors.red),
+      secondaryBackground: Container(color: Colors.green),
+      confirmDismiss: (direction) => _confirmDismiss(alert['id'], direction),
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        color: alert['isRead'] ? Colors.grey[100] : Colors.white,
+        elevation: alert['isRead'] ? 1 : 2,
+        child: InkWell(
+          onTap: () => _markAsRead(alert['id']),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                _buildThresholdSetting(
-                  'Humidité (%)',
-                  minHumidity,
-                  maxHumidity,
-                  (min, max) {
-                    setState(() {
-                      minHumidity = min;
-                      maxHumidity = max;
-                    });
-                  },
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: alertColor.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _getIconForType(alert['type']),
+                    color: alertColor,
+                  ),
                 ),
-                _buildThresholdSetting(
-                  'Température (°C)',
-                  minTemperature,
-                  maxTemperature,
-                  (min, max) {
-                    setState(() {
-                      minTemperature = min;
-                      maxTemperature = max;
-                    });
-                  },
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        alert['title'],
+                        style: TextStyle(
+                          fontWeight:
+                              alert['isRead']
+                                  ? FontWeight.normal
+                                  : FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        alert['message'],
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTimestamp(alert['timestamp']),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
-                _buildThresholdSetting(
-                  'Humidité sol (%)',
-                  minSoilMoisture,
-                  maxSoilMoisture,
-                  (min, max) {
-                    setState(() {
-                      minSoilMoisture = min;
-                      maxSoilMoisture = max;
-                    });
-                  },
-                ),
-                _buildThresholdSetting(
-                  'Luminosité (lux)',
-                  minLuminosity,
-                  maxLuminosity,
-                  (min, max) {
-                    setState(() {
-                      minLuminosity = min;
-                      maxLuminosity = max;
-                    });
-                  },
-                ),
+                if (!alert['isRead'])
+                  const Icon(Icons.circle, size: 10, color: Colors.green),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fermer'),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _buildThresholdSetting(
-    String label,
-    double currentMin,
-    double currentMax,
-    Function(double, double) onChanged,
-  ) {
-    final minController = TextEditingController(
-      text: currentMin.toStringAsFixed(1),
-    );
-    final maxController = TextEditingController(
-      text: currentMax.toStringAsFixed(1),
-    );
+  Future<bool?> _confirmDismiss(
+    String alertId,
+    DismissDirection direction,
+  ) async {
+    if (direction == DismissDirection.endToStart) {
+      // Marquer comme lu
+      await _markAsRead(alertId);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Alerte marquée comme lue')));
+      return false; // Ne pas supprimer l'élément
+    } else {
+      // Supprimer
+      return await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Supprimer cette alerte ?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Annuler'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Supprimer'),
+                ),
+              ],
+            ),
+      );
+    }
+  }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: minController,
-                  decoration: const InputDecoration(labelText: 'Min'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    final min = double.tryParse(value) ?? currentMin;
-                    final max =
-                        double.tryParse(maxController.text) ?? currentMax;
-                    onChanged(min, max);
-                  },
-                ),
+  Future<void> _confirmClearAll() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Supprimer toutes les alertes ?'),
+            content: const Text('Cette action est irréversible.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Annuler'),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: maxController,
-                  decoration: const InputDecoration(labelText: 'Max'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    final min =
-                        double.tryParse(minController.text) ?? currentMin;
-                    final max = double.tryParse(value) ?? currentMax;
-                    onChanged(min, max);
-                  },
-                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Supprimer'),
               ),
             ],
           ),
-        ],
-      ),
     );
+
+    if (confirmed == true) {
+      await _database.remove();
+      setState(() {
+        _alerts.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Toutes les alertes ont été supprimées')),
+      );
+    }
+  }
+
+  Future<void> _refreshAlerts() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final snapshot = await _database.once();
+      _processAlerts(snapshot.snapshot);
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _retryConnection() async {
+    await _refreshAlerts();
   }
 }
